@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #e2e8f0;
+  background-color: #050914;
+}
+
+body {
+  @apply min-h-screen bg-night text-slate-100 antialiased;
+}
+
+a {
+  @apply font-semibold text-lagoon transition-colors duration-200 ease-out;
+}
+
+a:hover {
+  @apply text-lime;
+}
+
+#root {
+  @apply min-h-screen;
+}
+
+.glass-panel {
+  @apply rounded-2xl border border-white/10 bg-white/5 shadow-panel backdrop-blur;
+}
+
+/* FlexLayout dark theme overrides */
+.flexlayout__layout {
+  background: #050914;
+  color: #e2e8f0;
+}
+
+.flexlayout__tabset,
+.flexlayout__border {
+  background: transparent;
+}
+
+.flexlayout__tabset_content,
+.flexlayout__tabset_tabbar_inner,
+.flexlayout__tabset_tabbar_outer_top,
+.flexlayout__tabset_tabbar_outer_bottom,
+.flexlayout__tabset_tabbar_outer,
+.flexlayout__tabset_tabbar_outer_tabset,
+.flexlayout__tabset_header,
+.flexlayout__border_inner_tab_container,
+.flexlayout__border_inner_tab_container_top,
+.flexlayout__tab_toolbar {
+  background: rgba(255, 255, 255, 0.02);
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.flexlayout__tabset_header,
+.flexlayout__border_inner_tab_container,
+.flexlayout__border_inner_tab_container_top,
+.flexlayout__tab_toolbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.flexlayout__tab_button,
+.flexlayout__border_button {
+  color: #cbd5e1;
+  background: transparent !important;
+  border-radius: 6px 6px 0 0;
+}
+
+.flexlayout__tab_button--selected,
+.flexlayout__border_button--selected {
+  color: #ecfeff;
+  background: rgba(17, 94, 89, 0.22) !important;
+  border-radius: 6px 6px 0 0;
+}
+
+.flexlayout__tab,
+.flexlayout__tabset_tabbar_outer,
+.flexlayout__border_content {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.flexlayout__splitter {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.flexlayout__splitter:hover,
+.flexlayout__splitter_drag {
+  background: rgba(94, 234, 212, 0.25);
+}
+
+/* Terminal scrollbars */
+.glass-panel .overflow-auto::-webkit-scrollbar {
+  width: 10px;
+}
+
+.glass-panel .overflow-auto::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel .overflow-auto::-webkit-scrollbar-thumb {
+  background: rgba(94, 234, 212, 0.45);
+  border-radius: 8px;
+  border: 2px solid rgba(5, 9, 20, 0.8);
+}
+
+.glass-panel .overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(94, 234, 212, 0.7);
+}
+
+.grid-glow {
+  background-image:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(14, 165, 233, 0.28),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(163, 230, 53, 0.22),
+      transparent 32%
+    ),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(255, 255, 255, 0.05) 25%, #050914 25%);
+  background-size:
+    100% 100%,
+    100% 100%,
+    16px 16px,
+    16px 16px,
+    16px 16px,
+    16px 16px;
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0;
+}

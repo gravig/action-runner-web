@@ -92,8 +92,8 @@ function TerminalPanel() {
   }, [dispatch, lastMessage]);
 
   return (
-    <div className="glass-panel flex h-full min-h-0 flex-col p-0">
-      <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
+    <div className="flex flex-col h-full min-h-0 p-0 glass-panel">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-white">
             Server Terminal
@@ -110,7 +110,7 @@ function TerminalPanel() {
       </div>
 
       <div className="flex-1 overflow-auto" ref={scrollRef}>
-        <div className="flex flex-col gap-0 bg-black font-mono text-xs">
+        <div className="flex flex-col gap-0 font-mono text-xs bg-black">
           {isLoading ? (
             <div className="px-3 py-2 text-slate-300">
               Loading saved logs...

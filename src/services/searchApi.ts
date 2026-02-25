@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { PUBLIC_BASE } from "./api";
 
 export type ProductResult = {
   type: "product";
@@ -43,11 +44,11 @@ export type SearchParams = {
 
 export const searchApi = createApi({
   reducerPath: "searchApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000" }),
+  baseQuery: fetchBaseQuery({ baseUrl: PUBLIC_BASE }),
   endpoints: (builder) => ({
     search: builder.query<SearchResponse, SearchParams>({
       query: ({ q, limit = 100, tables = "products,categories,banners" }) => ({
-        url: "/public/search",
+        url: "/search",
         params: { q, limit, tables },
       }),
     }),

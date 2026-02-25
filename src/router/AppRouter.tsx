@@ -6,7 +6,6 @@ import Workspace from "../pages/Workspace";
 import Products from "../pages/Products";
 import Discovery from "../pages/Discovery";
 import Runner from "../pages/Runner";
-
 function AppRouter() {
   return (
     <BrowserRouter>

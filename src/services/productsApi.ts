@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { ProductPayload } from "../types/products";
+import { WORKER_BASE } from "./api";
 
 type ProductsResponse = {
   count: number;
@@ -8,14 +9,11 @@ type ProductsResponse = {
 
 export const productsApi = createApi({
   reducerPath: "productsApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000" }),
+  baseQuery: fetchBaseQuery({ baseUrl: WORKER_BASE }),
   tagTypes: ["Products"],
   endpoints: (builder) => ({
     getProducts: builder.query<ProductPayload[], void>({
-      query: () => ({
-        url: "/products",
-        method: "GET",
-      }),
+      query: () => "/products",
       transformResponse: (response: ProductsResponse) => response.products,
       providesTags: (result) => {
         if (!result) return [{ type: "Products", id: "LIST" }];

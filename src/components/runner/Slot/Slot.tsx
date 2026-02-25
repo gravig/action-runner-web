@@ -5,7 +5,12 @@ import MonacoEditor, { type Monaco } from "@monaco-editor/react";
 import { resolveRenderer, RENDERER_CONFIGS } from "../shapeRenderers";
 import { TypeContext, DeclarationContext } from "./slotContext";
 import { TypeProvider, DeclarationProvider } from "./providers";
-import { matchesAccepts, PRIMITIVE_SHAPES, initSlotValue } from "./helpers";
+import {
+  matchesAccepts,
+  PRIMITIVE_SHAPES,
+  initSlotValue,
+  deserializeSlot,
+} from "./helpers";
 import { ShapeSelectDropdown } from "./ShapeSelectDropdown";
 import { getEnhancer } from "./enhancers";
 import { ContextPreview } from "./ContextPreview";
@@ -262,6 +267,18 @@ export function Slot({
           {value.shape.type[0]}
         </span>
         <div className="flex items-center gap-2 ml-auto shrink-0">
+          {value.shape.type.includes("CustomAction") && value.shape.payload && (
+            <button
+              onClick={() => {
+                const unpacked = deserializeSlot(value.shape.payload!, shapes);
+                if (unpacked) onChange(unpacked);
+              }}
+              title="Replace with inner payload action to edit params directly"
+              className="text-[10px] text-violet-400 transition hover:text-violet-200"
+            >
+              modify
+            </button>
+          )}
           <button
             onClick={() => setOpen((v) => !v)}
             className="text-[10px] text-slate-500 transition hover:text-slate-200"

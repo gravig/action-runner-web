@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { WORKER_BASE } from "./api";
 
 export type LogEntry = {
   ts: string;
@@ -33,7 +34,8 @@ export function parseLogLine(raw: string, fallbackLevel = "INFO"): LogEntry {
   };
 }
 
-function parseLogContent(content: string): LogEntry[] {
+function parseLogContent(content: string | undefined | null): LogEntry[] {
+  if (!content) return [];
   return content
     .split("\n")
     .map((line) => line.trim())
@@ -43,13 +45,10 @@ function parseLogContent(content: string): LogEntry[] {
 
 export const logsApi = createApi({
   reducerPath: "logsApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000" }),
+  baseQuery: fetchBaseQuery({ baseUrl: WORKER_BASE }),
   endpoints: (builder) => ({
     getLogs: builder.query<LogEntry[], void>({
-      query: () => ({
-        url: "/logs",
-        method: "GET",
-      }),
+      query: () => "/logs",
       transformResponse: (response: LogsResponse) =>
         parseLogContent(response.content),
     }),

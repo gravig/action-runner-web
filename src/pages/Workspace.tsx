@@ -16,6 +16,8 @@ import Runner from "./Runner";
 import { Actions as ActionsPanel } from "./Actions";
 import { Datasets } from "./Datasets";
 import { DatasetPreviewContext } from "../context/DatasetPreviewContext";
+import { Workers } from "./Workers";
+import { WorkersProvider } from "../context/WorkersProvider";
 
 const layoutJson = {
   global: {
@@ -41,6 +43,12 @@ const layoutJson = {
             type: "tab",
             name: "Runner",
             component: "runner",
+            enableClose: false,
+          },
+          {
+            type: "tab",
+            name: "Workers",
+            component: "workers",
             enableClose: false,
           },
           {
@@ -160,6 +168,7 @@ function Workspace() {
     if (component === "runner") return <Runner />;
     if (component === "actions") return <ActionsPanel />;
     if (component === "datasets") return <Datasets />;
+    if (component === "workers") return <Workers />;
     if (component === "datasetPreview") {
       const cfg = node.getConfig() as { datasetName: string } | null;
       if (cfg?.datasetName)
@@ -186,13 +195,15 @@ function Workspace() {
           </div>
         </div>
         <div className="flex-1 min-h-0 border rounded-2xl border-white/10 bg-white/5 shadow-panel">
-          <DatasetPreviewContext.Provider value={openDatasetPreview}>
-            <Layout
-              model={model}
-              factory={factory}
-              onModelChange={handleModelChange}
-            />
-          </DatasetPreviewContext.Provider>
+          <WorkersProvider>
+            <DatasetPreviewContext.Provider value={openDatasetPreview}>
+              <Layout
+                model={model}
+                factory={factory}
+                onModelChange={handleModelChange}
+              />
+            </DatasetPreviewContext.Provider>
+          </WorkersProvider>
         </div>
       </div>
     </div>

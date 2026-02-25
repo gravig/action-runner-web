@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { ActionShape } from "../types/actions";
+import { ADMIN_BASE } from "./api";
 
 export type CreateCustomActionPayload = {
   actionName: string;
@@ -17,16 +18,16 @@ export type UpdateCustomActionPayload = {
 
 export const actionsApi = createApi({
   reducerPath: "actionsApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000" }),
+  baseQuery: fetchBaseQuery({ baseUrl: ADMIN_BASE }),
   tagTypes: ["ActionShapes"],
   endpoints: (builder) => ({
     getActionShapes: builder.query<ActionShape[], void>({
-      query: () => "/admin/actions/shapes",
+      query: () => "/actions/shapes",
       providesTags: ["ActionShapes"],
     }),
     runAction: builder.mutation<unknown, unknown>({
       query: (payload) => ({
-        url: "/admin/run",
+        url: "/run",
         method: "POST",
         body: payload,
       }),
@@ -36,7 +37,7 @@ export const actionsApi = createApi({
       CreateCustomActionPayload
     >({
       query: (payload) => ({
-        url: "/admin/actions/custom",
+        url: "/actions/custom",
         method: "POST",
         body: payload,
       }),
@@ -47,7 +48,7 @@ export const actionsApi = createApi({
       UpdateCustomActionPayload
     >({
       query: ({ actionName, ...body }) => ({
-        url: `/admin/actions/custom/${encodeURIComponent(actionName)}`,
+        url: `/actions/custom/${encodeURIComponent(actionName)}`,
         method: "PUT",
         body,
       }),

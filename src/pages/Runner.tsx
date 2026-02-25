@@ -3,11 +3,17 @@ import {
   useGetActionShapesQuery,
   useRunActionMutation,
 } from "../services/actionsApi";
-import { TypesDropdown } from "../components/runner/TypesDropdown";
+import { WorkersDropdown } from "../components/runner/WorkersDropdown";
+import { useWorkers } from "../hooks/useWorkers";
+import type { Worker } from "./Workers";
 import { Builder } from "../components/runner/Builder";
 import { SaveCustomActionModal } from "../components/runner/SaveCustomActionModal";
-import { serializeSlot } from "../components/runner/Slot/helpers";
+import {
+  serializeSlot,
+  deserializeSlot,
+} from "../components/runner/Slot/helpers";
 import type { SlotValue } from "../types/builder";
+import type { ActionShape } from "../types/actions";
 
 // Keep replacer for the preview panel JSON display (strips shape, keeps readable)
 function replacer(key: string, val: unknown) {
@@ -49,9 +55,16 @@ function IconPlay({ className }: { className?: string }) {
 function Runner() {
   const { data, error, isLoading } = useGetActionShapesQuery();
   const [runAction, { isLoading: isRunning }] = useRunActionMutation();
+  const { workers } = useWorkers();
   const [builderValue, setBuilderValue] = useState<SlotValue | null>(null);
+  const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
+  // Auto-select first worker when list arrives and nothing is selected yet
+  if (selectedWorker === null && workers.length > 0) {
+    setSelectedWorker(workers[0]);
+  }
   const [showPreview, setShowPreview] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [editShape, setEditShape] = useState<ActionShape | null>(null);
 
   return (
     <>
@@ -59,7 +72,11 @@ function Runner() {
         <div className="h-full p-4 overflow-auto">
           {/* Toolbar */}
           <div className="flex items-center gap-3 mb-4">
-            {data && <TypesDropdown shapes={data} />}
+            <WorkersDropdown
+              workers={workers}
+              value={selectedWorker}
+              onChange={setSelectedWorker}
+            />
             {builderValue && (
               <button
                 onClick={() => setShowSaveModal(true)}
@@ -138,6 +155,22 @@ function Runner() {
           initialPayload={builderValue}
           onClose={() => setShowSaveModal(false)}
           onSaved={() => {}}
+        />
+      )}
+
+      {editShape && data && (
+        <SaveCustomActionModal
+          shapes={data}
+          initialPayload={
+            editShape.payload ? deserializeSlot(editShape.payload, data) : null
+          }
+          initialData={{
+            actionName: editShape.type[0],
+            summary: editShape.summary,
+            tags: editShape.tags,
+          }}
+          onClose={() => setEditShape(null)}
+          onSaved={() => setEditShape(null)}
         />
       )}
     </>

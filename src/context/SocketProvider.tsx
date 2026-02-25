@@ -12,14 +12,15 @@ import {
   type SocketKey,
   type SocketState,
 } from "./SocketContext";
+import { API } from "../services/api";
 
 const defaultUrls: Record<SocketKey, string> = {
   logs:
     (import.meta.env.VITE_WS_LOGS_URL as string | undefined) ??
-    "ws://localhost:8000/ws/logs",
+    API.adminWorkersLogs,
   products:
     (import.meta.env.VITE_WS_PRODUCTS_URL as string | undefined) ??
-    "ws://localhost:8000/ws/products",
+    API.workerWsProducts,
 };
 
 const baseState: SocketState = {

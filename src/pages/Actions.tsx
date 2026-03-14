@@ -354,7 +354,9 @@ export function Actions() {
             {groups.length === 0 && query && (
               <div className="flex flex-col items-center justify-center py-12 gap-2">
                 <span className="text-sm text-slate-500">No actions match</span>
-                <span className="text-xs text-slate-600">&ldquo;{query}&rdquo;</span>
+                <span className="text-xs text-slate-600">
+                  &ldquo;{query}&rdquo;
+                </span>
               </div>
             )}
             {groups.map(({ rendererType, shapes }) => (

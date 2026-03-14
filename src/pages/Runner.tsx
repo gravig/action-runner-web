@@ -98,7 +98,8 @@ function EditorModeSwitch({
 }
 
 function Runner() {
-  const [editorMode, setEditorMode] = useLocalStorage<EditorMode>("runner.editorMode");
+  const [editorMode, setEditorMode] =
+    useLocalStorage<EditorMode>("runner.editorMode");
   const { data, error, isLoading } = useActionShapes();
   const [runAction, { isLoading: isRunning }] = useRunAction();
   const { workers } = useWorkers();

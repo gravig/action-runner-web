@@ -17,7 +17,10 @@ import type { ActionShape } from "../../../types/actions";
 import { ShapeNode, type ShapeNodeData } from "./ShapeNode";
 import { StartNode } from "./StartNode";
 import { ElementsEvents } from "../../../modules/definitions/ElementsModule";
-import { updateCustomActionFn, useActionShapes } from "../../../services/actionsApi";
+import {
+  updateCustomActionFn,
+  useActionShapes,
+} from "../../../services/actionsApi";
 
 // ─── Flow graph serialization ─────────────────────────────────────────────────
 
@@ -200,7 +203,7 @@ export function FlowEditor({ onRun, isRunning }: FlowEditorProps = {}) {
     const toAdd = pendingEdgesRef.current;
     pendingEdgesRef.current = [];
     setEdges((prev) => [...prev, ...toAdd]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes]);
   // ── Update a literal node's value ─────────────────────────────────────────
   const updateNodeValue = useCallback(
@@ -292,7 +295,10 @@ export function FlowEditor({ onRun, isRunning }: FlowEditorProps = {}) {
       const newEdges: Edge[] = [];
 
       const PRIMITIVES: ActionShape[] = [
-        { type: ["Javascript", "String", "Literal", "Element"], callable: false },
+        {
+          type: ["Javascript", "String", "Literal", "Element"],
+          callable: false,
+        },
         { type: ["String", "Literal", "Element"], callable: false },
         { type: ["Number", "Literal", "Element"], callable: false },
         { type: ["Boolean", "Literal", "Element"], callable: false },
@@ -300,27 +306,44 @@ export function FlowEditor({ onRun, isRunning }: FlowEditorProps = {}) {
 
       let rowIndex = 0;
       for (const [paramName, rawValue] of Object.entries(rawParams)) {
-        if (!rawValue || typeof rawValue !== "object") { rowIndex++; continue; }
-        const rv = rawValue as { type?: string[]; value?: unknown; params?: unknown };
-        if (!rv.type?.length || rv.params !== undefined) { rowIndex++; continue; }
+        if (!rawValue || typeof rawValue !== "object") {
+          rowIndex++;
+          continue;
+        }
+        const rv = rawValue as {
+          type?: string[];
+          value?: unknown;
+          params?: unknown;
+        };
+        if (!rv.type?.length || rv.params !== undefined) {
+          rowIndex++;
+          continue;
+        }
 
-        const childShape: ActionShape =
-          PRIMITIVES.find((s) => s.type[0] === rv.type![0]) ??
-          { type: rv.type!, callable: false };
+        const childShape: ActionShape = PRIMITIVES.find(
+          (s) => s.type[0] === rv.type![0],
+        ) ?? { type: rv.type!, callable: false };
 
         const childId = `${id}-param-${paramName}`;
         const childX = snap(node.position.x - 300, POSITION_GRID);
-        const childY = snap(node.position.y + rowIndex * (SIZE_GRID * 2), POSITION_GRID);
+        const childY = snap(
+          node.position.y + rowIndex * (SIZE_GRID * 2),
+          POSITION_GRID,
+        );
 
         newChildNodes.push({
           id: childId,
           type: "shape",
           position: { x: childX, y: childY },
-          style: { width: snap(228, SIZE_GRID), height: snap(44 + 52 + 10, SIZE_GRID) },
+          style: {
+            width: snap(228, SIZE_GRID),
+            height: snap(44 + 52 + 10, SIZE_GRID),
+          },
           data: {
             shape: childShape,
             value: rv.value as string | number | boolean,
-            onChange: (v: string | number | boolean) => updateNodeValue(childId, v),
+            onChange: (v: string | number | boolean) =>
+              updateNodeValue(childId, v),
             onRemove: () => removeNode(childId),
           } satisfies ShapeNodeData,
         });

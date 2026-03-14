@@ -7,14 +7,15 @@
  *   /public/*  – unauthenticated routes (search)
  */
 
-// Derive the backend host from the current page's hostname so the app works
-// on any machine on the LAN without extra config. Can be overridden via .env.
+// In development the Vite dev-server proxies /admin, /worker, /public and
+// /auth to the backend, so relative URLs suffice and CORS never fires.
+// In production (or when VITE_API_BASE is set) we still build absolute URLs.
 const _host =
   typeof window !== "undefined" ? window.location.hostname : "localhost";
 
 const HTTP_BASE =
   (import.meta.env.VITE_API_BASE as string | undefined) ??
-  `http://${_host}:8000`;
+  (import.meta.env.DEV ? "" : `http://${_host}:8000`);
 const WS_BASE =
   (import.meta.env.VITE_WS_BASE as string | undefined) ?? `ws://${_host}:8000`;
 
@@ -48,15 +49,39 @@ export const API = {
   adminWorkersStream: `${WS_BASE}/admin/workers/stream`,
   adminWorkersLogs: `${WS_BASE}/admin/workers/logs`,
 
+  // Auth
+  authToken: `${HTTP_BASE}/auth/token`,
+
   // Worker – HTTP
   workerLogs: `${WORKER_BASE}/logs`,
-  workerProducts: `${WORKER_BASE}/products`,
 
   // Worker – WebSocket
-  workerWsProducts: `${WS_BASE}/admin/workers/products`,
   workerWs: (channel: string) =>
     `${WS_BASE}/admin/workers/${encodeURIComponent(channel)}`,
 
   // Public
   publicSearch: `${PUBLIC_BASE}/search`,
 } as const;
+
+// ── Auth helpers ──────────────────────────────────────────────────────────────
+
+export const TOKEN_KEY = "auth_token";
+
+/**
+ * Drop-in replacement for `fetch` that automatically injects
+ * `Authorization: Bearer <token>` from localStorage when a token is present.
+ * Throws on non-OK responses.
+ */
+export async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
+  const token = localStorage.getItem(TOKEN_KEY);
+  const headers = new Headers(init?.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const res = await fetch(url, { ...init, headers });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(body || `${res.status} ${res.statusText}`);
+  }
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}

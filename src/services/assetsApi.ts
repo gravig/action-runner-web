@@ -7,17 +7,7 @@ import type {
   CreateAssetPayload,
   UpdateAssetPayload,
 } from "../types/assets";
-import { ADMIN_BASE } from "./api";
-
-async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init);
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(body || `${res.status} ${res.statusText}`);
-  }
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
-}
+import { ADMIN_BASE, apiFetch } from "./api";
 
 const jsonHeaders = { "Content-Type": "application/json" };
 

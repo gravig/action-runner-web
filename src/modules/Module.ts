@@ -21,6 +21,11 @@ export interface ModuleOptions {
    * Only relevant for `panel: "page"` modules.
    */
   fullPage?: boolean;
+  /**
+   * When `true` the route is accessible without authentication.
+   * Only relevant for `panel: "page"` modules.
+   */
+  public?: boolean;
   /** Optional icon component shown in the tab header (future use). */
   icon?: ComponentType;
   /** Optional tags for filtering / discovery (future use). */
@@ -68,6 +73,7 @@ export function Module(options: ModuleOptions = {}) {
       panel: options.panel ?? "main",
       ...(options.route ? { route: options.route } : {}),
       ...(options.fullPage ? { fullPage: options.fullPage } : {}),
+      ...(options.public ? { public: options.public } : {}),
       ...(options.icon ? { icon: options.icon } : {}),
       ...(options.tags ? { tags: options.tags } : {}),
       ...(instance.events ? { events: instance.events } : {}),

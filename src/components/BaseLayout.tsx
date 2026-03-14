@@ -1,11 +1,22 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { ModuleContainer } from "../modules";
+import { logout } from "../services/authApi";
+import type { AppDispatch } from "../store";
 
 function BaseLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+
   const navLinks = ModuleContainer.getAll().filter(
     (m) => m.panel === "page" && m.route && !m.fullPage,
   );
+
+  function handleLogout() {
+    dispatch(logout());
+    navigate("/auth/login", { replace: true });
+  }
 
   return (
     <div className="min-h-screen bg-night text-slate-100">
@@ -34,6 +45,25 @@ function BaseLayout() {
               );
             })}
           </nav>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/0 px-4 py-2 text-sm font-semibold text-slate-400 transition-colors hover:border-red-500/40 hover:text-red-400"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-4"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16,17 21,12 16,7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Sign out
+          </button>
         </header>
 
         <main className="flex-1 flex min-h-0 flex-col">

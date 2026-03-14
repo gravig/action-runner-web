@@ -3,13 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
 import type { Dataset } from "../types/datasets";
-import { ADMIN_BASE } from "./api";
-
-async function apiFetch<T>(url: string): Promise<T> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return res.json() as Promise<T>;
-}
+import { ADMIN_BASE, apiFetch } from "./api";
 
 export function fetchDatasetsFn(): Promise<Dataset[]> {
   return apiFetch(`${ADMIN_BASE}/datasets`);

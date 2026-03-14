@@ -1,6 +1,6 @@
 import { configureStore, type Middleware } from "@reduxjs/toolkit";
 import { actionsReducer } from "./services/actionsApi";
-import { productsReducer } from "./services/productsApi";
+import { authReducer } from "./services/authApi";
 import { logsReducer } from "./services/logsApi";
 import { datasetsReducer } from "./services/datasetsApi";
 import { projectionsReducer } from "./services/projectionsApi";
@@ -17,8 +17,8 @@ export const createStore = ({
 }: CreateStoreOptions = {}) => {
   const store = configureStore({
     reducer: {
+      auth: authReducer,
       actions: actionsReducer,
-      products: productsReducer,
       logs: logsReducer,
       datasets: datasetsReducer,
       projections: projectionsReducer,
@@ -35,6 +35,4 @@ export const createStore = ({
 };
 
 export type RootState = ReturnType<ReturnType<typeof createStore>["getState"]>;
-export type AppDispatch = ReturnType<
-  ReturnType<typeof createStore>["dispatch"]
->;
+export type AppDispatch = ReturnType<typeof createStore>["dispatch"];

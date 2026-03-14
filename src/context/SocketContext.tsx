@@ -2,7 +2,7 @@ import { createContext } from "react";
 
 export type SocketStatus = "idle" | "connecting" | "open" | "closed" | "error";
 
-export type SocketKey = "logs" | "products";
+export type SocketKey = "logs";
 
 export type SocketState = {
   socket: WebSocket | null;

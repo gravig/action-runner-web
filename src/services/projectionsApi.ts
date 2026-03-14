@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
 import type { Projection, ProjectionListResponse } from "../types/projections";
-import { ADMIN_BASE } from "./api";
+import { ADMIN_BASE, apiFetch } from "./api";
 
 export type UpsertProjectionPayload = {
   id?: string;
@@ -12,16 +12,6 @@ export type UpsertProjectionPayload = {
 };
 
 // ─── Fetch helpers ────────────────────────────────────────────────────────────
-
-async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init);
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(body || `${res.status} ${res.statusText}`);
-  }
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
-}
 
 const jsonHeaders = { "Content-Type": "application/json" };
 

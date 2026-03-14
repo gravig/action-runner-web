@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
 import type { ActionShape } from "../types/actions";
-import { ADMIN_BASE } from "./api";
+import { ADMIN_BASE, apiFetch } from "./api";
 
 export type CreateCustomActionPayload = {
   actionName: string;
@@ -18,16 +18,6 @@ export type UpdateCustomActionPayload = {
   summary?: string;
   tags?: string[];
 };
-
-async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init);
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(body || `${res.status} ${res.statusText}`);
-  }
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
-}
 
 const jsonHeaders = { "Content-Type": "application/json" };
 

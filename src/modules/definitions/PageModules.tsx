@@ -1,8 +1,8 @@
 import { Module } from "../Module";
 import type { IModule } from "../types";
 import Home from "../../pages/Home";
+import Login from "../../pages/Login";
 import Workspace from "../../pages/Workspace";
-import Products from "../../pages/Products";
 import Discovery from "../../pages/Discovery";
 import { Projections } from "../../pages/Projections";
 import Assets from "../../pages/Assets";
@@ -22,11 +22,6 @@ export class HomeModule implements IModule {
 })
 export class WorkspaceModule implements IModule {
   render = Workspace;
-}
-
-@Module({ id: "products", name: "Products", panel: "page", route: "/products" })
-export class ProductsModule implements IModule {
-  render = Products;
 }
 
 @Module({ id: "runner-page", name: "Runner", panel: "page", route: "/runner" })
@@ -69,4 +64,16 @@ export class TerminalPageModule implements IModule {
 })
 export class DiscoveryModule implements IModule {
   render = Discovery;
+}
+
+@Module({
+  id: "login",
+  name: "Login",
+  panel: "page",
+  route: "/auth/login",
+  fullPage: true,
+  public: true,
+})
+export class LoginModule implements IModule {
+  render = Login;
 }

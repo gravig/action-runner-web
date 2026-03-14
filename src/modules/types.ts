@@ -41,6 +41,11 @@ export interface ModuleDef {
    * Only relevant for `panel: "page"` modules.
    */
   readonly fullPage?: boolean;
+  /**
+   * When `true` the route is accessible without authentication.
+   * Only relevant for `panel: "page"` modules.
+   */
+  readonly public?: boolean;
   /** Optional icon component shown alongside the tab name (future use). */
   readonly icon?: ComponentType;
   /** Optional tags used for search / discoverability (future use). */

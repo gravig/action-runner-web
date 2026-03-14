@@ -1,8 +1,6 @@
 import { Module } from "../Module";
 import type { IModule } from "../types";
 import TerminalPanel from "../../components/TerminalPanel";
-import ProductListPanel from "../../components/ProductListPanel";
-import LatestProductPanel from "../../components/LatestProductPanel";
 import Runner from "../../pages/Runner";
 import { Datasets } from "../../pages/Datasets";
 import { Workers } from "../../pages/Workers";
@@ -12,16 +10,6 @@ import Assets from "../../pages/Assets";
 @Module({ id: "terminal", name: "Terminal", panel: "sidebar" })
 export class TerminalModule implements IModule {
   render = TerminalPanel;
-}
-
-@Module({ id: "productList", name: "Product List", panel: "sidebar" })
-export class ProductListModule implements IModule {
-  render = ProductListPanel;
-}
-
-@Module({ id: "latestProduct", name: "Latest Product" })
-export class LatestProductModule implements IModule {
-  render = LatestProductPanel;
 }
 
 @Module({ id: "runner", name: "Runner" })

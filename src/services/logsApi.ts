@@ -6,7 +6,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
-import { WORKER_BASE } from "./api";
+import { WORKER_BASE, apiFetch } from "./api";
 
 export type LogEntry = {
   ts: string;
@@ -49,9 +49,7 @@ function parseLogContent(content: string | undefined | null): LogEntry[] {
 }
 
 export async function fetchLogsFn(): Promise<LogEntry[]> {
-  const res = await fetch(`${WORKER_BASE}/logs`);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  const data: LogsResponse = await res.json();
+  const data = await apiFetch<LogsResponse>(`${WORKER_BASE}/logs`);
   return parseLogContent(data.content);
 }
 

@@ -18,9 +18,6 @@ const defaultUrls: Record<SocketKey, string> = {
   logs:
     (import.meta.env.VITE_WS_LOGS_URL as string | undefined) ??
     API.adminWorkersLogs,
-  products:
-    (import.meta.env.VITE_WS_PRODUCTS_URL as string | undefined) ??
-    API.workerWsProducts,
 };
 
 const baseState: SocketState = {
@@ -33,27 +30,22 @@ const baseState: SocketState = {
 export function SocketProvider({
   children,
   logsUrl,
-  productsUrl,
 }: {
   children: ReactNode;
   logsUrl?: string;
-  productsUrl?: string;
 }) {
   const [sockets, setSockets] = useState<Record<SocketKey, SocketState>>({
     logs: { ...baseState },
-    products: { ...baseState },
   });
   const socketRefs = useRef<Record<SocketKey, WebSocket | null>>({
     logs: null,
-    products: null,
   });
 
   const targets = useMemo(
     () => ({
       logs: logsUrl ?? defaultUrls.logs,
-      products: productsUrl ?? defaultUrls.products,
     }),
-    [logsUrl, productsUrl],
+    [logsUrl],
   );
 
   const updateState = useCallback(
@@ -118,7 +110,6 @@ export function SocketProvider({
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       connect("logs");
-      connect("products");
     });
     return () => {
       cancelAnimationFrame(frame);

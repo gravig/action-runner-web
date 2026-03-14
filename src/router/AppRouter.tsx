@@ -1,23 +1,33 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import BaseLayout from "../components/BaseLayout";
-import Terminal from "../components/Terminal";
-import Home from "../pages/Home";
-import Workspace from "../pages/Workspace";
-import Products from "../pages/Products";
-import Discovery from "../pages/Discovery";
-import Runner from "../pages/Runner";
+import { ModuleContainer } from "../modules";
+import { ModuleView } from "../pages/ModuleView";
+
 function AppRouter() {
+  const pages = ModuleContainer.getAll().filter(
+    (m) => m.panel === "page" && m.route,
+  );
+  const shellPages = pages.filter((m) => !m.fullPage);
+  const barePages = pages.filter((m) => m.fullPage);
+
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<BaseLayout />}>
-          <Route index element={<Home />} />
-          <Route path="workspace" element={<Workspace />} />
-          <Route path="terminal" element={<Terminal />} />
-          <Route path="products" element={<Products />} />
-          <Route path="runner" element={<Runner />} />
+          {shellPages.map(({ id, route, component: Page }) => (
+            <Route
+              key={id}
+              path={route === "/" ? undefined : route}
+              index={route === "/"}
+              element={<Page />}
+            />
+          ))}
         </Route>
-        <Route path="discovery" element={<Discovery />} />
+        {barePages.map(({ id, route, component: Page }) => (
+          <Route key={id} path={route} element={<Page />} />
+        ))}
+        {/* Pop-out: renders any registered module full-screen */}
+        <Route path="/module/:id" element={<ModuleView />} />
       </Routes>
     </BrowserRouter>
   );

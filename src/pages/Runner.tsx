@@ -1,11 +1,10 @@
 import { useState } from "react";
-import {
-  useGetActionShapesQuery,
-  useRunActionMutation,
-} from "../services/actionsApi";
+import { FlowEditor } from "../components/runner/flow";
+import { useActionShapes, useRunAction } from "../services/actionsApi";
 import { WorkersDropdown } from "../components/runner/WorkersDropdown";
 import { useWorkers } from "../hooks/useWorkers";
 import type { Worker } from "./Workers";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import { Builder } from "../components/runner/Builder";
 import { SaveCustomActionModal } from "../components/runner/SaveCustomActionModal";
 import {
@@ -52,9 +51,56 @@ function IconPlay({ className }: { className?: string }) {
   );
 }
 
+function IconSliders({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
+      />
+    </svg>
+  );
+}
+
+type EditorMode = "default" | "advanced";
+
+function EditorModeSwitch({
+  value,
+  onChange,
+}: {
+  value: EditorMode;
+  onChange: (m: EditorMode) => void;
+}) {
+  return (
+    <div className="flex items-center gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5">
+      {(["default", "advanced"] as EditorMode[]).map((mode) => (
+        <button
+          key={mode}
+          onClick={() => onChange(mode)}
+          className={`rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors ${
+            value === mode
+              ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
+              : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          {mode}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function Runner() {
-  const { data, error, isLoading } = useGetActionShapesQuery();
-  const [runAction, { isLoading: isRunning }] = useRunActionMutation();
+  const [editorMode, setEditorMode] = useLocalStorage<EditorMode>("runner.editorMode");
+  const { data, error, isLoading } = useActionShapes();
+  const [runAction, { isLoading: isRunning }] = useRunAction();
   const { workers } = useWorkers();
   const [builderValue, setBuilderValue] = useState<SlotValue | null>(null);
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
@@ -69,9 +115,15 @@ function Runner() {
   return (
     <>
       <div className="h-full glass-panel">
-        <div className="h-full p-4 overflow-auto">
+        <div
+          className={`h-full flex flex-col ${
+            editorMode === "advanced" ? "overflow-hidden" : "overflow-auto"
+          } p-4`}
+        >
           {/* Toolbar */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex flex-shrink-0 items-center gap-3 mb-4">
+            <EditorModeSwitch value={editorMode} onChange={setEditorMode} />
+            <div className="w-px h-4 bg-white/10" />
             <WorkersDropdown
               workers={workers}
               value={selectedWorker}
@@ -93,7 +145,7 @@ function Runner() {
                   const payload = serializeSlot(builderValue);
                   console.log("[Runner] action payload:", payload);
                   try {
-                    const result = await runAction(payload).unwrap();
+                    const result = await runAction(payload);
                     console.log("[Runner] run result:", result);
                   } catch (err) {
                     console.error("[Runner] run error:", err);
@@ -129,21 +181,37 @@ function Runner() {
           )}
 
           {isLoading && <p className="text-sm text-slate-400">Loading…</p>}
-          {error && (
-            <p className="text-sm text-red-400">
-              Error: {"status" in error ? error.status : "Unknown error"}
-            </p>
-          )}
+          {error && <p className="text-sm text-red-400">Error: {error}</p>}
           {data && (
             <>
-              {/* Builder */}
-              <div className="mb-6">
-                <Builder
-                  shapes={data}
-                  value={builderValue}
-                  onChange={setBuilderValue}
-                />
-              </div>
+              {editorMode === "default" && (
+                /* ── Default: visual slot builder ── */
+                <div className="mb-6">
+                  <Builder
+                    shapes={data}
+                    value={builderValue}
+                    onChange={setBuilderValue}
+                  />
+                </div>
+              )}
+
+              {editorMode === "advanced" && (
+                /* ── Advanced: ReactFlow pipeline editor ── */
+                <div className="flex-1 min-h-0">
+                  <FlowEditor
+                    onRun={async (payload) => {
+                      console.log("[Runner] flow payload:", payload);
+                      try {
+                        const result = await runAction(payload);
+                        console.log("[Runner] run result:", result);
+                      } catch (err) {
+                        console.error("[Runner] run error:", err);
+                      }
+                    }}
+                    isRunning={isRunning}
+                  />
+                </div>
+              )}
             </>
           )}
         </div>

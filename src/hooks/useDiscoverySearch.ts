@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useLazySearchQuery } from "../services/searchApi";
+import { search } from "../services/searchApi";
 import type {
   ProductResult,
   CategoryResult,
   BannerResult,
+  SearchResult,
 } from "../services/searchApi";
 
 const DEBOUNCE_MS = 400;
@@ -18,19 +19,33 @@ export function useDiscoverySearch() {
   const [query, setQuery] = useState("");
   const [dismissed, setDismissed] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [data, setData] = useState<SearchResult[] | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const isUninitialized = data === null && !isFetching && !isError;
 
-  const [triggerSearch, { data, isFetching, isError, isUninitialized }] =
-    useLazySearchQuery();
-
-  // Debounced search — only triggers the API, no setState
+  // Debounced search
   useEffect(() => {
     const q = query.trim();
     if (!q) return;
-    const timer = setTimeout(() => {
-      triggerSearch({ q });
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setIsFetching(true);
+      setIsError(false);
+      try {
+        const results = await search({ q });
+        if (!cancelled) setData(results);
+      } catch {
+        if (!cancelled) setIsError(true);
+      } finally {
+        if (!cancelled) setIsFetching(false);
+      }
     }, DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [query, triggerSearch]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [query]);
 
   // Close dropdown on outside click
   const handleClickOutside = useCallback((e: MouseEvent) => {

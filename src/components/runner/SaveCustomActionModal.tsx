@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  useCreateCustomActionMutation,
-  useUpdateCustomActionMutation,
+  useCreateCustomAction,
+  useUpdateCustomAction,
 } from "../../services/actionsApi";
 import type { ActionShape } from "../../types/actions";
 import type { SlotValue } from "../../types/builder";
@@ -101,9 +101,9 @@ export function SaveCustomActionModal({
     initialPayload,
   );
   const [createCustomAction, { isLoading: isCreating, error: createError }] =
-    useCreateCustomActionMutation();
+    useCreateCustomAction();
   const [updateCustomAction, { isLoading: isUpdating, error: updateError }] =
-    useUpdateCustomActionMutation();
+    useUpdateCustomAction();
   const isLoading = isCreating || isUpdating;
   const error = createError ?? updateError;
   const nameRef = useRef<HTMLInputElement>(null);
@@ -142,14 +142,14 @@ export function SaveCustomActionModal({
           payload: serializedPayload,
           summary: summary.trim() || undefined,
           tags: tags.length ? tags : undefined,
-        }).unwrap();
+        });
       } else {
         await createCustomAction({
           actionName: trimmed,
           payload: serializedPayload,
           summary: summary.trim() || undefined,
           tags: tags.length ? tags : undefined,
-        }).unwrap();
+        });
       }
       onSaved();
       onClose();
@@ -158,12 +158,7 @@ export function SaveCustomActionModal({
     }
   }
 
-  const apiError =
-    error && "data" in error
-      ? String((error.data as { detail?: string })?.detail ?? error.data)
-      : error
-        ? "Request failed"
-        : null;
+  const apiError = error ?? null;
 
   return (
     /* Backdrop */

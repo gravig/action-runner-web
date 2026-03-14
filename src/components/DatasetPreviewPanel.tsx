@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetDatasetQuery } from "../services/datasetsApi";
+import { useDataset } from "../services/datasetsApi";
 
 // ─── Primitive value renderer ─────────────────────────────────────────────────
 
@@ -252,7 +252,7 @@ function IconDatabase({ className }: { className?: string }) {
 // ─── Panel ────────────────────────────────────────────────────────────────────
 
 export function DatasetPreviewPanel({ datasetName }: { datasetName: string }) {
-  const { data, isLoading, error } = useGetDatasetQuery(datasetName);
+  const { data, isLoading, error } = useDataset(datasetName);
 
   const rowCount = Array.isArray(data) ? data.length : null;
 

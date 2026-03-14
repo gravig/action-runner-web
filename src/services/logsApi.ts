@@ -1,4 +1,11 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import {
+  createAsyncThunk,
+  createSlice,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
 import { WORKER_BASE } from "./api";
 
 export type LogEntry = {
@@ -21,12 +28,10 @@ export function parseLogLine(raw: string, fallbackLevel = "INFO"): LogEntry {
       text: "",
     };
   }
-
   const match = trimmed.match(/^(\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+(.*)$/);
   if (match) {
     return { ts: match[1], level: match[2], text: match[3] };
   }
-
   return {
     ts: new Date().toLocaleTimeString(),
     level: fallbackLevel,
@@ -43,16 +48,66 @@ function parseLogContent(content: string | undefined | null): LogEntry[] {
     .map((line) => parseLogLine(line, "HIST"));
 }
 
-export const logsApi = createApi({
-  reducerPath: "logsApi",
-  baseQuery: fetchBaseQuery({ baseUrl: WORKER_BASE }),
-  endpoints: (builder) => ({
-    getLogs: builder.query<LogEntry[], void>({
-      query: () => "/logs",
-      transformResponse: (response: LogsResponse) =>
-        parseLogContent(response.content),
-    }),
-  }),
+export async function fetchLogsFn(): Promise<LogEntry[]> {
+  const res = await fetch(`${WORKER_BASE}/logs`);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  const data: LogsResponse = await res.json();
+  return parseLogContent(data.content);
+}
+
+export const fetchLogs = createAsyncThunk("logs/fetch", fetchLogsFn);
+
+interface LogsState {
+  entries: LogEntry[];
+  isLoading: boolean;
+  error: string | null;
+}
+
+const logsSlice = createSlice({
+  name: "logs",
+  initialState: { entries: [], isLoading: false, error: null } as LogsState,
+  reducers: {
+    pushLog(state, { payload }: PayloadAction<LogEntry>) {
+      state.entries.push(payload);
+      if (state.entries.length > 500) {
+        state.entries.splice(0, state.entries.length - 500);
+      }
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchLogs.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchLogs.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
+        state.entries = payload;
+      })
+      .addCase(fetchLogs.rejected, (state, { error }) => {
+        state.isLoading = false;
+        state.error = error.message ?? "Failed to load logs";
+      });
+  },
 });
 
-export const { useGetLogsQuery } = logsApi;
+export const logsReducer = logsSlice.reducer;
+export const { pushLog } = logsSlice.actions;
+
+type ThunkAppDispatch = ThunkDispatch<unknown, undefined, UnknownAction>;
+
+export function useGetLogsQuery() {
+  const dispatch = useDispatch<ThunkAppDispatch>();
+  const { entries, isLoading, error } = useSelector(
+    (s: { logs: LogsState }) => s.logs,
+  );
+  useEffect(() => {
+    dispatch(fetchLogs());
+  }, [dispatch]);
+  return {
+    data: entries,
+    isLoading,
+    isError: !!error,
+    error,
+  };
+}

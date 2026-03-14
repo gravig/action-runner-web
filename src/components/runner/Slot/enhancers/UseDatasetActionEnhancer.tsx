@@ -1,4 +1,4 @@
-import { useGetDatasetsQuery } from "../../../../services/datasetsApi";
+import { useDatasets } from "../../../../services/datasetsApi";
 import { DeclarationProvider, TypeProvider } from "../providers";
 import { buildDatasetInterface } from "../datasetUtils";
 import { registerEnhancer } from "./registry";
@@ -20,7 +20,7 @@ export function UseDatasetActionEnhancer({ value, children }: EnhancerProps) {
     type: string;
   }[];
 
-  const { data: datasets } = useGetDatasetsQuery();
+  const { data: datasets } = useDatasets();
   const dataset = datasetName
     ? datasets?.find((d) => d.name === datasetName)
     : undefined;

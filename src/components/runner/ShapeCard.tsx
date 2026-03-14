@@ -204,10 +204,12 @@ function ShapeCard({
   shape,
   className,
   onEdit,
+  onDelete,
 }: {
   shape: ActionShape;
   className?: string;
   onEdit?: () => void;
+  onDelete?: () => void;
 }) {
   const rendererType = resolveRenderer(shape.type);
   const cfg = RENDERER_CONFIGS[rendererType];
@@ -246,6 +248,25 @@ function ShapeCard({
                 <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2L11.5 2.5Z" />
               </svg>
               Edit
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-400/50 transition"
+            >
+              <svg
+                className="w-2.5 h-2.5"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M2 4h12M5 4V2.5h6V4M6.5 7v5M9.5 7v5M3 4l1 9.5h8L13 4" />
+              </svg>
+              Delete
             </button>
           )}
           <span

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import type { ActionShape, JsContextEntry } from "../../../types/actions";
 import type { SlotValue } from "../../../types/builder";
-import MonacoEditor, { type Monaco } from "@monaco-editor/react";
+import { MonacoCodeEditor } from "../MonacoCodeEditor";
 import { resolveRenderer, RENDERER_CONFIGS } from "../shapeRenderers";
 import { TypeContext, DeclarationContext } from "./slotContext";
 import { TypeProvider, DeclarationProvider } from "./providers";
@@ -49,50 +49,20 @@ function SlotForm({
   const jsTypeContext = useContext(TypeContext);
   const jsDeclarationsContext = useContext(DeclarationContext);
 
-  function handleEditorDidMount(_editor: unknown, monaco: Monaco) {
-    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-      target: monaco.languages.typescript.ScriptTarget.ES2020,
-      allowNonTsExtensions: true,
-      checkJs: true,
-      noLib: true,
-    });
-
-    // Clear all default and previously registered libs so only our
-    // system-defined declarations are available.
-    monaco.languages.typescript.javascriptDefaults.setExtraLibs([]);
-
-    const lines: string[] = [
+  if (value.type[0] === "Javascript") {
+    const extraDeclarations = [
       ...Object.values(jsDeclarationsContext),
       ...Object.entries(jsTypeContext).map(
         ([name, type]) => `declare const ${name}: ${type};`,
       ),
-    ];
-
-    if (lines.length > 0) {
-      monaco.languages.typescript.javascriptDefaults.addExtraLib(
-        lines.join("\n"),
-        "ts:filename/slot-types.d.ts",
-      );
-    }
-  }
-
-  if (value.type[0] === "Javascript") {
+    ].join("\n");
     return (
       <div className="w-full min-w-[320px] max-w-full">
-        <MonacoEditor
+        <MonacoCodeEditor
           height="200px"
-          defaultLanguage="javascript"
-          onMount={handleEditorDidMount}
           value={typeof value.value === "string" ? value.value : ""}
-          onChange={(val) => onChange({ ...value, value: val ?? "" })}
-          theme="vs-dark"
-          options={{
-            minimap: { enabled: false },
-            fontSize: 13,
-            wordWrap: "on",
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-          }}
+          onChange={(val) => onChange({ ...value, value: val })}
+          extraDeclarations={extraDeclarations}
         />
       </div>
     );

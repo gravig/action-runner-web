@@ -2,12 +2,11 @@ import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useSocket } from "../hooks/useSocket";
 import {
-  logsApi,
+  pushLog,
   parseLogLine,
   useGetLogsQuery,
   type LogEntry,
 } from "../services/logsApi";
-import type { AppDispatch } from "../store";
 import { JsonHighlight } from "./runner/JsonHighlight";
 
 const badgeByStatus: Record<string, string> = {
@@ -63,7 +62,7 @@ function LogRow({ log }: { log: LogEntry }) {
 }
 
 function TerminalPanel() {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useDispatch();
   const { status, lastMessage, error } = useSocket();
   const {
     data: logs = [],
@@ -80,15 +79,7 @@ function TerminalPanel() {
 
   useEffect(() => {
     if (!lastMessage) return;
-    dispatch(
-      logsApi.util.updateQueryData("getLogs", undefined, (draft) => {
-        const entry: LogEntry = parseLogLine(lastMessage, "LIVE");
-        draft.push(entry);
-        if (draft.length > 500) {
-          draft.splice(0, draft.length - 500);
-        }
-      }),
-    );
+    dispatch(pushLog(parseLogLine(lastMessage, "LIVE")));
   }, [dispatch, lastMessage]);
 
   return (
@@ -119,8 +110,7 @@ function TerminalPanel() {
 
           {!isLoading && isError ? (
             <div className="px-3 py-2 text-red-300">
-              Failed to load logs:{" "}
-              {(fetchError as { status?: string })?.status || "Error"}
+              Failed to load logs: {fetchError ?? "Error"}
             </div>
           ) : null}
 

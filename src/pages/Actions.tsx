@@ -14,8 +14,8 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import ShapeCard from "../components/runner/ShapeCard";
-import { useGetActionShapesQuery } from "../services/actionsApi";
+import ShapeCard, { ShapeCardCompact } from "../components/runner/ShapeCard";
+import { useActionShapes, useDeleteCustomAction } from "../services/actionsApi";
 import { SaveCustomActionModal } from "../components/runner/SaveCustomActionModal";
 import { deserializeSlot } from "../components/runner/Slot/helpers";
 import { useLocalStorage } from "../hooks/useLocalStorage";
@@ -27,6 +27,9 @@ import {
 } from "../components/runner/shapeRenderers";
 import type { RendererType } from "../components/runner/shapeRenderers";
 import type { ActionShape } from "../types/actions";
+import { useEvents } from "../context/EventsContext";
+import { useSubscriberCount } from "../hooks/useObservable";
+import { useWindowContext } from "../context/WindowContext";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -92,10 +95,16 @@ function GroupSection({
   rendererType,
   shapes,
   onEdit,
+  onDelete,
+  onSelectElement,
+  compact,
 }: {
   rendererType: RendererType;
   shapes: ActionShape[];
   onEdit?: (shape: ActionShape) => void;
+  onDelete?: (shape: ActionShape) => void;
+  onSelectElement?: (shape: ActionShape) => void;
+  compact?: boolean;
 }) {
   const storageKey = `actions.group.${rendererType}` as PersistedStateKey;
   const [open, setOpen] = useLocalStorage<boolean>(storageKey);
@@ -127,7 +136,7 @@ function GroupSection({
         <button
           {...attributes}
           {...listeners}
-          className="flex items-center justify-center w-5 h-6 text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing transition-colors shrink-0 touch-none"
+          className="flex items-center justify-center w-5 h-6 transition-colors text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing shrink-0 touch-none"
           tabIndex={0}
           aria-label={`Drag to reorder ${cfg.badgeText}s`}
         >
@@ -172,13 +181,41 @@ function GroupSection({
 
       {/* Cards grid */}
       {open && (
-        <div className="grid grid-cols-1 gap-3 @sm:grid-cols-1 @xl:grid-cols-2 @2xl:grid-cols-3 pl-6">
+        <div
+          className={`grid grid-cols-1 gap-2 pl-6 ${compact ? "" : "@sm:grid-cols-1 @xl:grid-cols-2 @2xl:grid-cols-3 gap-3"}`}
+        >
           {shapes.map((shape) => (
-            <ShapeCard
-              key={shape.type[0]}
-              shape={shape}
-              onEdit={onEdit ? () => onEdit(shape) : undefined}
-            />
+            <div key={shape.type[0]} className="relative group/card">
+              {compact ? (
+                <ShapeCardCompact shape={shape} />
+              ) : (
+                <ShapeCard
+                  shape={shape}
+                  onEdit={onEdit ? () => onEdit(shape) : undefined}
+                  onDelete={onDelete ? () => onDelete(shape) : undefined}
+                />
+              )}
+              {onSelectElement && (
+                <button
+                  onClick={() => onSelectElement(shape)}
+                  title={`Add ${shape.type[0]} to canvas`}
+                  className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center
+                             rounded bg-teal-500/20 text-teal-400 opacity-0 transition-opacity
+                             hover:bg-teal-500/40 hover:text-teal-200
+                             group-hover/card:opacity-100"
+                >
+                  <svg
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    className="w-3 h-3"
+                  >
+                    <path strokeLinecap="round" d="M6 2v8M2 6h8" />
+                  </svg>
+                </button>
+              )}
+            </div>
           ))}
         </div>
       )}
@@ -189,11 +226,18 @@ function GroupSection({
 // ─── Actions page ─────────────────────────────────────────────────────────────
 
 export function Actions() {
-  const { data, error, isLoading } = useGetActionShapesQuery();
+  const { isPopup } = useWindowContext();
+  const events = useEvents<{ onSelectElement: ActionShape }>();
+  const hasObservers =
+    useSubscriberCount(events.observable("onSelectElement")) > 0;
+  const { data, error, isLoading } = useActionShapes();
   const [savedOrder, setSavedOrder] = useLocalStorage<string[]>(
     "actions.groups.order",
   );
+  const [compact, setCompact] = useLocalStorage<boolean>("actions.compact");
+  const [search, setSearch] = useState("");
   const [editShape, setEditShape] = useState<ActionShape | null>(null);
+  const [deleteCustomAction] = useDeleteCustomAction();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -215,7 +259,15 @@ export function Actions() {
     );
   }
 
-  const groups = applyOrder(groupShapes(data), savedOrder);
+  const query = search.trim().toLowerCase();
+  const groups = applyOrder(groupShapes(data), savedOrder)
+    .map((g) => ({
+      ...g,
+      shapes: query
+        ? g.shapes.filter((s) => s.type[0]?.toLowerCase().includes(query))
+        : g.shapes,
+    }))
+    .filter((g) => g.shapes.length > 0);
   const ids = groups.map((g) => g.rendererType);
 
   function handleDragEnd(event: DragEndEvent) {
@@ -228,7 +280,70 @@ export function Actions() {
   }
 
   return (
-    <div className="@container p-4 h-full glass-panel text-sm overflow-auto">
+    <div
+      className={`@container text-sm overflow-auto ${
+        isPopup ? "h-full w-full p-4" : "p-4 h-full glass-panel"
+      }`}
+    >
+      {/* Toolbar */}
+      <div className="flex items-center gap-3 mb-3">
+        {/* Search */}
+        <div className="relative flex-1">
+          <svg
+            className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          >
+            <circle cx="6.5" cy="6.5" r="4" />
+            <path d="M11 11l3 3" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search actions…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-md bg-white/5 border border-white/10 pl-8 pr-3 py-1.5 text-[12px] text-slate-200 placeholder:text-slate-600 outline-none focus:border-teal-500/50 focus:bg-white/8 transition-colors"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute transition-colors -translate-y-1/2 right-2 top-1/2 text-slate-500 hover:text-slate-300"
+            >
+              <svg viewBox="0 0 12 12" fill="currentColor" className="w-3 h-3">
+                <path
+                  d="M2 2l8 8M10 2l-8 8"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Compact toggle */}
+        <label className="flex items-center gap-2 cursor-pointer select-none shrink-0">
+          <span className="text-[11px] text-slate-400">Compact</span>
+          <button
+            role="switch"
+            aria-checked={!!compact}
+            onClick={() => setCompact((v) => !v)}
+            className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+              compact ? "bg-teal-500" : "bg-white/10"
+            }`}
+          >
+            <span
+              className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
+                compact ? "translate-x-4" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </label>
+      </div>
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -236,13 +351,40 @@ export function Actions() {
       >
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col gap-4">
+            {groups.length === 0 && query && (
+              <div className="flex flex-col items-center justify-center py-12 gap-2">
+                <span className="text-sm text-slate-500">No actions match</span>
+                <span className="text-xs text-slate-600">&ldquo;{query}&rdquo;</span>
+              </div>
+            )}
             {groups.map(({ rendererType, shapes }) => (
               <GroupSection
                 key={rendererType}
                 rendererType={rendererType}
                 shapes={shapes}
+                compact={!!compact}
+                onSelectElement={
+                  hasObservers
+                    ? (shape) => events.emit("onSelectElement", shape)
+                    : undefined
+                }
                 onEdit={
-                  rendererType === "CustomAction" ? setEditShape : undefined
+                  !compact && rendererType === "CustomAction"
+                    ? setEditShape
+                    : undefined
+                }
+                onDelete={
+                  !compact && rendererType === "CustomAction"
+                    ? (shape) => {
+                        if (
+                          window.confirm(
+                            `Delete custom action "${shape.type[0]}"? This cannot be undone.`,
+                          )
+                        ) {
+                          deleteCustomAction(shape.type[0]);
+                        }
+                      }
+                    : undefined
                 }
               />
             ))}

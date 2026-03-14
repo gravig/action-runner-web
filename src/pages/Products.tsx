@@ -1,8 +1,8 @@
-import { useGetProductsQuery } from "../services/productsApi";
+import { useProducts } from "../services/productsApi";
 
 function Products() {
   const { data, isLoading, isError, error, refetch, isFetching } =
-    useGetProductsQuery();
+    useProducts();
 
   return (
     <div className="grid-glow">
@@ -36,10 +36,7 @@ function Products() {
               <span className="text-xs text-slate-300">Loading...</span>
             ) : null}
             {isError ? (
-              <span className="text-xs text-red-300">
-                {(error as { status?: string; data?: unknown })?.status ||
-                  "Error"}
-              </span>
+              <span className="text-xs text-red-300">{error ?? "Error"}</span>
             ) : null}
           </div>
 

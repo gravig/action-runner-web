@@ -7,11 +7,16 @@
  *   /public/*  – unauthenticated routes (search)
  */
 
+// Derive the backend host from the current page's hostname so the app works
+// on any machine on the LAN without extra config. Can be overridden via .env.
+const _host =
+  typeof window !== "undefined" ? window.location.hostname : "localhost";
+
 const HTTP_BASE =
   (import.meta.env.VITE_API_BASE as string | undefined) ??
-  "http://localhost:8000";
+  `http://${_host}:8000`;
 const WS_BASE =
-  (import.meta.env.VITE_WS_BASE as string | undefined) ?? "ws://localhost:8000";
+  (import.meta.env.VITE_WS_BASE as string | undefined) ?? `ws://${_host}:8000`;
 
 export const ADMIN_BASE = `${HTTP_BASE}/admin`;
 export const WORKER_BASE = `${ADMIN_BASE}/workers`;

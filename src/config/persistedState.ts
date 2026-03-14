@@ -39,6 +39,17 @@ export const PERSISTED_STATE_CONFIG = {
     defaultValue: true,
     description: "Actions page: Element group expanded",
   },
+  // ── Actions page – compact mode toggle ───────────────────────────────────
+  "actions.compact": {
+    defaultValue: false,
+    description: "Actions page: compact (name-only) card display mode",
+  },
+
+  // ── Runner page – editor mode ────────────────────────────────────────────
+  "runner.editorMode": {
+    defaultValue: "default" as "default" | "advanced",
+    description: "Runner page: selected editor mode (default | advanced)",
+  },
   // ── Actions page – shape-group order ─────────────────────────────────────
   "actions.groups.order": {
     defaultValue: [] as string[],

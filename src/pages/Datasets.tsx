@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetDatasetsQuery } from "../services/datasetsApi";
+import { useDatasets } from "../services/datasetsApi";
 import type { Dataset, DatasetParam } from "../types/datasets";
 import { useDatasetPreview } from "../context/DatasetPreviewContext";
 
@@ -250,7 +250,7 @@ function DatasetCard({ dataset }: { dataset: Dataset }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function Datasets() {
-  const { data, isLoading, error } = useGetDatasetsQuery();
+  const { data, isLoading, error } = useDatasets();
 
   if (isLoading) {
     return (

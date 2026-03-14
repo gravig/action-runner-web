@@ -1,8 +1,8 @@
-import { useGetProductsQuery } from "../services/productsApi";
+import { useProducts } from "../services/productsApi";
 
 function ProductListPanel() {
   const { data, isLoading, isError, error, refetch, isFetching } =
-    useGetProductsQuery();
+    useProducts();
 
   return (
     <div className="glass-panel flex h-full min-h-0 flex-col p-0">
@@ -30,9 +30,7 @@ function ProductListPanel() {
 
           {!isLoading && isError ? (
             <div className="px-4 py-6 text-sm text-red-300">
-              Unable to load products.{" "}
-              {(error as { status?: string; data?: unknown })?.status ||
-                "Error"}
+              Unable to load products. {error || "Error"}
             </div>
           ) : null}
 

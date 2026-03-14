@@ -1,0 +1,16 @@
+{
+  "name": "Action Runner",
+  "short_name": "Action Runner",
+  "description": "Visual action runner workspace",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

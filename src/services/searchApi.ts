@@ -1,4 +1,3 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { PUBLIC_BASE } from "./api";
 
 export type ProductResult = {
@@ -33,7 +32,6 @@ export type BannerResult = {
 };
 
 export type SearchResult = ProductResult | CategoryResult | BannerResult;
-
 export type SearchResponse = SearchResult[];
 
 export type SearchParams = {
@@ -42,17 +40,10 @@ export type SearchParams = {
   tables?: string;
 };
 
-export const searchApi = createApi({
-  reducerPath: "searchApi",
-  baseQuery: fetchBaseQuery({ baseUrl: PUBLIC_BASE }),
-  endpoints: (builder) => ({
-    search: builder.query<SearchResponse, SearchParams>({
-      query: ({ q, limit = 100, tables = "products,categories,banners" }) => ({
-        url: "/search",
-        params: { q, limit, tables },
-      }),
-    }),
-  }),
-});
-
-export const { useLazySearchQuery } = searchApi;
+export async function search(params: SearchParams): Promise<SearchResponse> {
+  const { q, limit = 100, tables = "products,categories,banners" } = params;
+  const qs = new URLSearchParams({ q, limit: String(limit), tables });
+  const res = await fetch(`${PUBLIC_BASE}/search?${qs}`);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json() as Promise<SearchResponse>;
+}

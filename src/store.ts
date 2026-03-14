@@ -1,27 +1,40 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { productsApi } from "./services/productsApi";
-import { logsApi } from "./services/logsApi";
-import { searchApi } from "./services/searchApi";
-import { actionsApi } from "./services/actionsApi";
-import { datasetsApi } from "./services/datasetsApi";
+import { configureStore, type Middleware } from "@reduxjs/toolkit";
+import { actionsReducer } from "./services/actionsApi";
+import { productsReducer } from "./services/productsApi";
+import { logsReducer } from "./services/logsApi";
+import { datasetsReducer } from "./services/datasetsApi";
+import { projectionsReducer } from "./services/projectionsApi";
+import { assetsReducer } from "./services/assetsApi";
 
-export const store = configureStore({
-  reducer: {
-    [productsApi.reducerPath]: productsApi.reducer,
-    [logsApi.reducerPath]: logsApi.reducer,
-    [searchApi.reducerPath]: searchApi.reducer,
-    [actionsApi.reducerPath]: actionsApi.reducer,
-    [datasetsApi.reducerPath]: datasetsApi.reducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(
-      productsApi.middleware,
-      logsApi.middleware,
-      searchApi.middleware,
-      actionsApi.middleware,
-      datasetsApi.middleware,
-    ),
-});
+type CreateStoreOptions = {
+  middleware?: Middleware[];
+  preloadedState?: Record<string, unknown>;
+};
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export const createStore = ({
+  middleware,
+  preloadedState,
+}: CreateStoreOptions = {}) => {
+  const store = configureStore({
+    reducer: {
+      actions: actionsReducer,
+      products: productsReducer,
+      logs: logsReducer,
+      datasets: datasetsReducer,
+      projections: projectionsReducer,
+      assets: assetsReducer,
+    },
+    ...(preloadedState !== undefined && {
+      preloadedState: preloadedState as never,
+    }),
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(...(middleware ?? [])),
+  });
+
+  return store;
+};
+
+export type RootState = ReturnType<ReturnType<typeof createStore>["getState"]>;
+export type AppDispatch = ReturnType<
+  ReturnType<typeof createStore>["dispatch"]
+>;

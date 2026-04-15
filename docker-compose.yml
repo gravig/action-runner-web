@@ -6,5 +6,4 @@ services:
     volumes:
       - ./src:/app/src
     environment:
-      - VITE_HOST_IP=0.0.0.0
       - CHOKIDAR_USEPOLLING=true

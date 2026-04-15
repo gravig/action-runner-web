@@ -30,12 +30,9 @@ COPY . .
 # Vite default dev server port.
 EXPOSE 5173
 
-# Bind Vite to all interfaces so the port is reachable from outside the container.
-# vite.config.ts reads VITE_HOST_IP and passes it to server.host.
-ENV VITE_HOST_IP=0.0.0.0
-
 # Docker on macOS does not forward inotify events into Linux containers.
 # Chokidar polling ensures Vite HMR works correctly with a volume-mounted src tree.
 ENV CHOKIDAR_USEPOLLING=true
 
-CMD ["npm", "run", "dev"]
+# --host 0.0.0.0 binds Vite to all interfaces so the port is reachable from outside the container.
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

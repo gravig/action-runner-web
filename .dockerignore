@@ -1,0 +1,25 @@
+# Dependencies — reinstalled inside the container
+node_modules/
+
+# Vite / PWA build outputs
+dist/
+dev-dist/
+
+# Watchdog runtime artefacts
+logs/
+tmp/
+
+# Git
+.git/
+.gitignore
+
+# Editor / OS noise
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Docker files themselves
+Dockerfile
+.dockerignore

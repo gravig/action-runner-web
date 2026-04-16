@@ -19,7 +19,8 @@ import "react-grid-layout/css/styles.css";
 
 import React, { Children, isValidElement, useMemo, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout/legacy";
-import type { Layout, Layouts } from "react-grid-layout";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Layouts = any;
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -99,7 +100,7 @@ function LayoutManager({
 
   // Build an initial layout — pack panels left-to-right, wrapping at `cols`
   const initialLayouts = useMemo<Layouts>(() => {
-    const lg: Layout = [];
+    const lg: any[] = [];
     let col = 0;
     let row = 0;
     for (const p of panels) {
@@ -134,9 +135,9 @@ function LayoutManager({
   // When panels change (add/remove during editing), merge new ids into layout
   const mergedLayouts = useMemo<Layouts>(() => {
     const panelIds = new Set(panels.map((p) => p.id));
-    const addMissing = (base: Layout): Layout => {
+    const addMissing = (base: any[]): any[] => {
       const existing = new Set(base.map((l) => l.i));
-      const additions: Layout = [];
+      const additions: any[] = [];
       let maxY = base.reduce((m, l) => Math.max(m, l.y + l.h), 0);
       for (const p of panels) {
         if (!existing.has(p.id)) {

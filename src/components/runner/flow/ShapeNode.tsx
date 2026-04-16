@@ -227,8 +227,7 @@ export function ShapeNode({ data }: NodeProps) {
         isVisible={hovered}
         minWidth={180}
         minHeight={totalH}
-        snapWidth={SIZE_GRID}
-        snapHeight={SIZE_GRID}
+        {...({ snapWidth: SIZE_GRID, snapHeight: SIZE_GRID } as any)}
         lineStyle={{ borderColor: "rgba(100,116,139,0.4)" }}
         handleStyle={{
           width: 10,

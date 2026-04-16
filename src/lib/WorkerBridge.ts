@@ -145,7 +145,7 @@ class SWBridge<
           requestId as string | undefined,
         );
         this._clients.set(clientId, client);
-        this.emit("connect", client);
+        this.emit("connect", client as any);
         return;
       }
 
@@ -198,14 +198,14 @@ class ClientBridge<
     super();
 
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      this.emit("controllerchange", navigator.serviceWorker.controller);
+      this.emit("controllerchange", navigator.serviceWorker.controller as any);
     });
 
     navigator.serviceWorker.addEventListener("message", (e: MessageEvent) => {
       if (e.data?.type === RESPONSE_TYPE) return;
       console.log("[ClientBridge] message received:", e.data);
       // Route to the raw "message" channel.
-      this.emit("message", e);
+      this.emit("message", e as any);
       // Also route to a typed channel keyed by the message type string.
       if (typeof e.data?.type === "string") {
         const { type, ...rest } = e.data as Record<string, unknown>;

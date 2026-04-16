@@ -17,7 +17,6 @@ import {
   deserializeProjection,
 } from "./ProjectionEditor";
 import type {
-  Projection,
   EditableProjection,
   EditableComponent,
 } from "../types/projections";

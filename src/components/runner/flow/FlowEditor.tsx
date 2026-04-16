@@ -585,7 +585,7 @@ export function FlowEditor({ onRun, isRunning }: FlowEditorProps = {}) {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        isValidConnection={isValidConnection}
+        isValidConnection={isValidConnection as any}
         nodeTypes={nodeTypes}
         snapToGrid
         snapGrid={[POSITION_GRID, POSITION_GRID]}

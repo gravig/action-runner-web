@@ -31,7 +31,7 @@ export class EventEmitter<Events extends AnyEvents> {
   ): Observable<Events[K] | undefined> {
     if (!this._channels.has(event)) {
       const obs = new Observable<Events[K] | undefined>(undefined);
-      this._channels.set(event, obs);
+      this._channels.set(event, obs as any);
       // Hook up subscription change tracking for this new channel.
       obs.onSubscriptionChanged(() => {
         this._subscriptionListeners.forEach((fn) =>

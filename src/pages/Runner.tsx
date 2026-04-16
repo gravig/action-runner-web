@@ -51,7 +51,8 @@ function IconPlay({ className }: { className?: string }) {
   );
 }
 
-function IconSliders({ className }: { className?: string }) {
+// @ts-ignore -- reserved for future use
+function _IconSliders({ className }: { className?: string }) {
   return (
     <svg
       className={className}

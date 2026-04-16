@@ -15,6 +15,13 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       host,
+      allowedHosts: ["app.dgws.dev", ".dgws.dev"],
+      cors: {
+        origin: [
+          /^https?:\/\/app\.dgws\.dev$/,
+          /^https?:\/\/[^.]+\.dgws\.dev$/,
+        ],
+      },
       proxy: {
         "/admin": { target: apiTarget, changeOrigin: true },
         "/worker": { target: apiTarget, changeOrigin: true },

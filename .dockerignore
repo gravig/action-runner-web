@@ -2,7 +2,7 @@
 node_modules/
 
 # Vite / PWA build outputs
-dist/
+# dist/
 dev-dist/
 
 # Watchdog runtime artefacts

@@ -2,8 +2,6 @@ FROM node:18.19.0 AS builder
 
 COPY . /usr/src/app
 WORKDIR /usr/src/app
-# RUN --mount=type=secret,id=.npm,target=.npmrc,mode=0644 \
-#   npm ci --legacy-peer-deps && npm run build
 
 FROM amd64/nginx:1.21.1
 COPY --from=builder /usr/src/app/dist/ /usr/share/nginx/html/

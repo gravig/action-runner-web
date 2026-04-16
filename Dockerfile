@@ -1,38 +1,15 @@
-# =============================================================================
-# Dockerfile — action-runner-web dev server
-#
-# BUILD
-#   docker build -t action-runner-web-dev .
-#
-# RUN (with local file watching)
-#   docker run --rm -it \
-#     -p 5173:5173 \
-#     -v $(pwd):/app \
-#     action-runner-web-dev
-#
-# To pass a backend API target:
-#   -e VITE_API_BASE=http://host.docker.internal:8000
-# =============================================================================
+FROM node:18.19.0 as builder
 
-FROM node:20-alpine
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+# RUN --mount=type=secret,id=.npm,target=.npmrc,mode=0644 \
+#   npm ci --legacy-peer-deps && npm run build
 
-WORKDIR /app
+FROM amd64/nginx:1.21.1
+COPY --from=builder /usr/src/app/build/ /usr/share/nginx/html/
+RUN rm -rf /etc/nginx/conf.d&& \
+  mkdir -p /usr/share/nginx/html/js/
+COPY ./default.conf /etc/nginx/conf.d/
 
-# Copy manifests first so this layer is cached independently of source changes.
-COPY package.json package-lock.json ./
-
-RUN npm ci --include=dev
-
-# Copy the full project source.
-# When a host volume is mounted at runtime it overlays this layer.
-COPY . .
-
-# Vite default dev server port.
-EXPOSE 5173
-
-# Docker on macOS does not forward inotify events into Linux containers.
-# Chokidar polling ensures Vite HMR works correctly with a volume-mounted src tree.
-ENV CHOKIDAR_USEPOLLING=true
-
-# --host 0.0.0.0 binds Vite to all interfaces so the port is reachable from outside the container.
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# COPY config.js.template /etc/nginx/templates/config.js.template
+# ENV NGINX_ENVSUBST_OUTPUT_DIR=/usr/share/nginx/html/js

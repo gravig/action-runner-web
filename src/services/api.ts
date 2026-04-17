@@ -27,7 +27,7 @@ function createUrl({
   host,
   port,
 }: Window["Config"]["target"]["api"]) {
-  if (port === 80 || port === 443) {
+  if (Number(port) === 80 || Number(port) === 443) {
     return `${protocol}://${host}`;
   }
   return `${protocol}://${host}:${port}`;

@@ -1,3 +1,9 @@
 const Config = {
-  host: "localhost",
+  target: {
+    api: {
+      protocol: "http",
+      host: "localhost",
+      port: 8000,
+    },
+  },
 };

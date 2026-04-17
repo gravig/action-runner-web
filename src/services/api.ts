@@ -7,26 +7,43 @@
  *   /public/*  – unauthenticated routes (search)
  */
 
-// In development the Vite dev-server proxies /admin, /worker, /public and
-// /auth to the backend, so relative URLs suffice and CORS never fires.
-// In production (or when VITE_API_BASE is set) we still build absolute URLs.
-const _host =
-  typeof window !== "undefined" ? window.location.hostname : "localhost";
+declare global {
+  interface Window {
+    Config: {
+      target: {
+        api: {
+          protocol: string;
+          host: string;
+          port: number;
+        };
+      };
+    };
+  }
+  const Config: Window["Config"];
+}
 
-const HTTP_BASE =
-  (import.meta.env.VITE_API_BASE as string | undefined) ??
-  (import.meta.env.DEV ? "" : `http://${_host}:8000`);
-const WS_BASE =
-  (import.meta.env.VITE_WS_BASE as string | undefined) ?? `ws://${_host}:8000`;
+function createUrl({
+  protocol,
+  host,
+  port,
+}: Window["Config"]["target"]["api"]) {
+  if (port === 80 || port === 443) {
+    return `${protocol}://${host}`;
+  }
+  return `${protocol}://${host}:${port}`;
+}
 
-export const ADMIN_BASE = `${HTTP_BASE}/admin`;
+const API_URL_BASE = createUrl(Config.target.api);
+const WS_BASE = API_URL_BASE.replace(/^http/, "ws");
+
+export const ADMIN_BASE = `${API_URL_BASE}/admin`;
 export const WORKER_BASE = `${ADMIN_BASE}/workers`;
-export const PUBLIC_BASE = `${HTTP_BASE}/public`;
+export const PUBLIC_BASE = `${API_URL_BASE}/public`;
 
 // ── Admin routes ──────────────────────────────────────────────────────────────
 export const API = {
   // Health
-  health: `${HTTP_BASE}/health`,
+  health: `${API_URL_BASE}/health`,
 
   // Admin – runner
   adminRun: `${ADMIN_BASE}/run`,
@@ -50,7 +67,7 @@ export const API = {
   adminWorkersLogs: `${WS_BASE}/admin/workers/logs`,
 
   // Auth
-  authToken: `${HTTP_BASE}/auth/token`,
+  authToken: `${API_URL_BASE}/auth/token`,
 
   // Worker – HTTP
   workerLogs: `${WORKER_BASE}/logs`,

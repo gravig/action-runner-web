@@ -9,5 +9,5 @@ RUN rm -rf /etc/nginx/conf.d&& \
   mkdir -p /usr/share/nginx/html/js/
 COPY ./default.conf /etc/nginx/conf.d/
 
-# COPY config.js.template /etc/nginx/templates/config.js.template
-# ENV NGINX_ENVSUBST_OUTPUT_DIR=/usr/share/nginx/html/js
+COPY config.js.template /etc/nginx/templates/config.js.template
+ENV NGINX_ENVSUBST_OUTPUT_DIR=/usr/share/nginx/html/js
